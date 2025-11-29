@@ -51,14 +51,19 @@ public class InsurancePolicy {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
-    @JsonIgnore              // чтобы не уходить в цикл Client -> policies -> policy -> client...
+    @JsonIgnore
     private Client client;
 
     @OneToMany(mappedBy = "policy", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore              // чтобы не циклиться Policy -> claims -> policy...
+    @JsonIgnore
     private List<Claim> claims = new ArrayList<>();
 
-    public InsurancePolicy() {}
+    @OneToMany(mappedBy = "policy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Coverage> coverages = new ArrayList<>();
+
+    public InsurancePolicy() {
+    }
 
     public InsurancePolicy(String policyNumber,
                            PolicyType type,
@@ -77,35 +82,93 @@ public class InsurancePolicy {
         this.client = client;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getPolicyNumber() { return policyNumber; }
-    public void setPolicyNumber(String policyNumber) { this.policyNumber = policyNumber; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public PolicyType getType() { return type; }
-    public void setType(PolicyType type) { this.type = type; }
+    public String getPolicyNumber() {
+        return policyNumber;
+    }
 
-    public BigDecimal getCoverageAmount() { return coverageAmount; }
-    public void setCoverageAmount(BigDecimal coverageAmount) { this.coverageAmount = coverageAmount; }
+    public void setPolicyNumber(String policyNumber) {
+        this.policyNumber = policyNumber;
+    }
 
-    public BigDecimal getPremium() { return premium; }
-    public void setPremium(BigDecimal premium) { this.premium = premium; }
+    public PolicyType getType() {
+        return type;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public void setType(PolicyType type) {
+        this.type = type;
+    }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public BigDecimal getCoverageAmount() {
+        return coverageAmount;
+    }
 
-    public PolicyStatus getStatus() { return status; }
-    public void setStatus(PolicyStatus status) { this.status = status; }
+    public void setCoverageAmount(BigDecimal coverageAmount) {
+        this.coverageAmount = coverageAmount;
+    }
 
-    public Client getClient() { return client; }
-    public void setClient(Client client) { this.client = client; }
+    public BigDecimal getPremium() {
+        return premium;
+    }
 
-    public List<Claim> getClaims() { return claims; }
-    public void setClaims(List<Claim> claims) { this.claims = claims; }
+    public void setPremium(BigDecimal premium) {
+        this.premium = premium;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public PolicyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PolicyStatus status) {
+        this.status = status;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public List<Claim> getClaims() {
+        return claims;
+    }
+
+    public void setClaims(List<Claim> claims) {
+        this.claims = claims;
+    }
+
+    public List<Coverage> getCoverages() {
+        return coverages;
+    }
+
+    public void setCoverages(List<Coverage> coverages) {
+        this.coverages = coverages;
+    }
 
     public boolean isActive() {
         return status == PolicyStatus.ACTIVE && LocalDate.now().isBefore(endDate);
