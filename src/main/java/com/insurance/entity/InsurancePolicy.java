@@ -1,7 +1,9 @@
 package com.insurance.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "insurance_policies")
 public class InsurancePolicy {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,15 +51,22 @@ public class InsurancePolicy {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
+    @JsonIgnore              // чтобы не уходить в цикл Client -> policies -> policy -> client...
     private Client client;
 
     @OneToMany(mappedBy = "policy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore              // чтобы не циклиться Policy -> claims -> policy...
     private List<Claim> claims = new ArrayList<>();
 
     public InsurancePolicy() {}
 
-    public InsurancePolicy(String policyNumber, PolicyType type, BigDecimal coverageAmount, 
-                          BigDecimal premium, LocalDate startDate, LocalDate endDate, Client client) {
+    public InsurancePolicy(String policyNumber,
+                           PolicyType type,
+                           BigDecimal coverageAmount,
+                           BigDecimal premium,
+                           LocalDate startDate,
+                           LocalDate endDate,
+                           Client client) {
         this.policyNumber = policyNumber;
         this.type = type;
         this.coverageAmount = coverageAmount;
