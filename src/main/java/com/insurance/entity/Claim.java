@@ -1,14 +1,16 @@
 package com.insurance.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "claims")
 public class Claim {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,12 +47,17 @@ public class Claim {
 
     @ManyToOne
     @JoinColumn(name = "policy_id", nullable = false)
+    @JsonIgnore        // чтобы не уходить в цикл Claim -> policy -> claims -> policy ...
     private InsurancePolicy policy;
 
     public Claim() {}
 
-    public Claim(String claimNumber, LocalDate incidentDate, LocalDate reportDate, 
-                String description, BigDecimal claimAmount, InsurancePolicy policy) {
+    public Claim(String claimNumber,
+                 LocalDate incidentDate,
+                 LocalDate reportDate,
+                 String description,
+                 BigDecimal claimAmount,
+                 InsurancePolicy policy) {
         this.claimNumber = claimNumber;
         this.incidentDate = incidentDate;
         this.reportDate = reportDate;
