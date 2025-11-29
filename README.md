@@ -13,8 +13,8 @@ Spring Boot REST API для управления страховыми полис
 
 1. Клонируй репозиторий:
 ```bash
-git clone https://github.com/yourusername/insurance-demo.git
-cd insurance-demo
+git clone https://github.com/cosmosevil/service.git
+cd service
 ```
 
 2. Собери проект:
