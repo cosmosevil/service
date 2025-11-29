@@ -28,14 +28,14 @@ mvn spring-boot:run
 ```
 
 4. Приложение будет доступно по адресу:
-- API: http://localhost:8080/api
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- H2 Console: http://localhost:8080/h2-console
+- API: http://localhost:8081/api
+- Swagger UI: http://localhost:8081/swagger-ui.html
+- H2 Console: http://localhost:8081/h2-console
 
 ### Credentials
 
 - Username: admin
-- Password: admin123
+- Password: не будет 
 - H2 JDBC URL: jdbc:h2:mem:insurancedb
 
 ##  API Endpoints
@@ -80,11 +80,11 @@ mvn spring-boot:run
 docker-compose up -d
 ```
 
-## 📝 Примеры запросов
+## Примеры запросов
 
 ### Создание клиента
 ```bash
-curl -X POST http://localhost:8080/api/clients \
+curl -X POST http://localhost:8081/api/clients \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Иван",
@@ -98,7 +98,7 @@ curl -X POST http://localhost:8080/api/clients \
 
 ### Оформление полиса
 ```bash
-curl -X POST http://localhost:8080/api/policies \
+curl -X POST http://localhost:8081/api/policies \
   -H "Content-Type: application/json" \
   -d '{
     "policyNumber": "POL-2025-001",
@@ -113,7 +113,7 @@ curl -X POST http://localhost:8080/api/policies \
 
 ### Подача заявления
 ```bash
-curl -X POST http://localhost:8080/api/claims \
+curl -X POST http://localhost:8081/api/claims \
   -H "Content-Type: application/json" \
   -d '{
     "claimNumber": "CLM-2025-001",
@@ -126,5 +126,5 @@ curl -X POST http://localhost:8080/api/claims \
 ```
 
 ## Автор
-Муравьев Егор
+Муравьев Егор 
 Учебный проект по разработке REST API на Spring Boot.
