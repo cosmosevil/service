@@ -126,5 +126,6 @@ curl -X POST http://localhost:8081/api/claims \
 ```
 
 ## Автор
-Муравьев Егор \n
+#Муравьев Егор
+
 Учебный проект по разработке REST API на Spring Boot.
