@@ -63,6 +63,15 @@ mvn spring-boot:run
 - PATCH /api/claims/{id}/status — Обновить статус
 - DELETE /api/claims/{id} — Удалить заявление
 
+### Coverage (/api/claims)
+- GET /api/policies/{id}/coverages — Получить заявку
+- POST /api/policies/{id}/coverages — Создать заявку
+
+### Payment (/api/claims)
+- GET /api/claims/{id}/payments — Получить состояние оплаты
+- POST /api/claims/{id}/payments — Создать ордер на оплату
+
+
 ## Технологический стек
 
 - Spring Boot 3.2.0
