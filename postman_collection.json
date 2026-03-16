@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Support Ticket System",
-    "description": "Полная коллекция запросов. Аутентификация через JWT (Bearer token).\nHTTP:  http://localhost:8080\nHTTPS: https://localhost:8443 (после включения TLS через generate-certs.sh)",
+    "name": "Insurance System",
+    "description": "Полная коллекция запросов страховой системы. Аутентификация через JWT (Bearer token).\nHTTP:  http://localhost:8080\nHTTPS: https://localhost:8443 (после включения TLS через generate-certs.sh)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -92,7 +92,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
             "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin123!\"\n}" },
-            "description": "После выполнения переменные accessToken и refreshToken заполняются автоматически. В БД создаётся запись в user_sessions со статусом ACTIVE."
+            "description": "После выполнения переменные accessToken и refreshToken заполняются автоматически."
           }
         },
         {
@@ -138,363 +138,521 @@
       ]
     },
     {
-      "name": "SLA",
-      "description": "GET — AGENT и ADMIN. POST/PUT/DELETE — только ADMIN.\nАвторизация: Bearer {{accessToken}} (наследуется от коллекции).",
+      "name": "Coverages (Покрытия)",
+      "description": "GET — любой авторизованный. POST/PUT/DELETE — только ADMIN.",
       "item": [
         {
-          "name": "Получить все SLA",
+          "name": "Получить все покрытия",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/slas", "host": ["{{baseUrl}}"], "path": ["api", "slas"] }
+            "url": { "raw": "{{baseUrl}}/api/coverages", "host": ["{{baseUrl}}"], "path": ["api", "coverages"] }
           }
         },
         {
-          "name": "Получить SLA по ID",
+          "name": "Получить покрытие по ID",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/slas/1", "host": ["{{baseUrl}}"], "path": ["api", "slas", "1"] }
+            "url": { "raw": "{{baseUrl}}/api/coverages/1", "host": ["{{baseUrl}}"], "path": ["api", "coverages", "1"] }
           }
         },
         {
-          "name": "Создать SLA",
+          "name": "Создать покрытие",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/slas", "host": ["{{baseUrl}}"], "path": ["api", "slas"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Express\",\n  \"responseTimeHours\": 2,\n  \"resolutionTimeHours\": 8,\n  \"description\": \"Express SLA for VIP clients\"\n}" }
+            "url": { "raw": "{{baseUrl}}/api/coverages", "host": ["{{baseUrl}}"], "path": ["api", "coverages"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ОСАГО\",\n  \"description\": \"Обязательное страхование гражданской ответственности\",\n  \"coverageLimit\": 400000.00,\n  \"monthlyPremium\": 1200.00\n}" }
           }
         },
         {
-          "name": "Обновить SLA",
+          "name": "Создать покрытие — КАСКО",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/coverages", "host": ["{{baseUrl}}"], "path": ["api", "coverages"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"КАСКО\",\n  \"description\": \"Комплексное страхование автомобиля\",\n  \"coverageLimit\": 1500000.00,\n  \"monthlyPremium\": 4500.00\n}" }
+          }
+        },
+        {
+          "name": "Создать покрытие — Здоровье",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/coverages", "host": ["{{baseUrl}}"], "path": ["api", "coverages"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ДМС\",\n  \"description\": \"Добровольное медицинское страхование\",\n  \"coverageLimit\": 500000.00,\n  \"monthlyPremium\": 2000.00\n}" }
+          }
+        },
+        {
+          "name": "Обновить покрытие",
           "request": {
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/slas/1", "host": ["{{baseUrl}}"], "path": ["api", "slas", "1"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Critical\",\n  \"responseTimeHours\": 1,\n  \"resolutionTimeHours\": 4,\n  \"description\": \"Critical issues — updated\"\n}" }
+            "url": { "raw": "{{baseUrl}}/api/coverages/1", "host": ["{{baseUrl}}"], "path": ["api", "coverages", "1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ОСАГО\",\n  \"description\": \"Обязательное страхование — обновлено\",\n  \"coverageLimit\": 500000.00,\n  \"monthlyPremium\": 1350.00\n}" }
           }
         },
         {
-          "name": "Удалить SLA",
+          "name": "Удалить покрытие",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/slas/5", "host": ["{{baseUrl}}"], "path": ["api", "slas", "5"] }
+            "url": { "raw": "{{baseUrl}}/api/coverages/3", "host": ["{{baseUrl}}"], "path": ["api", "coverages", "3"] }
+          }
+        },
+        {
+          "name": "Дублирующее название → 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/coverages", "host": ["{{baseUrl}}"], "path": ["api", "coverages"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ОСАГО\",\n  \"description\": \"Дубликат\",\n  \"coverageLimit\": 100000.00,\n  \"monthlyPremium\": 500.00\n}" },
+            "description": "Ожидаем 409 Conflict — покрытие с таким названием уже существует."
           }
         }
       ]
     },
     {
-      "name": "Categories",
-      "description": "GET — AGENT и ADMIN. POST/PUT/DELETE — только ADMIN.",
+      "name": "Customers (Клиенты)",
+      "description": "GET — ADMIN/AGENT. POST/PUT/DELETE — только ADMIN.",
       "item": [
         {
-          "name": "Получить все категории",
+          "name": "Получить всех клиентов",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/categories", "host": ["{{baseUrl}}"], "path": ["api", "categories"] }
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] }
           }
         },
         {
-          "name": "Получить категорию по ID",
+          "name": "Получить клиента по ID",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/categories/1", "host": ["{{baseUrl}}"], "path": ["api", "categories", "1"] }
+            "url": { "raw": "{{baseUrl}}/api/customers/1", "host": ["{{baseUrl}}"], "path": ["api", "customers", "1"] }
           }
         },
         {
-          "name": "Создать категорию",
+          "name": "Создать клиента",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/categories", "host": ["{{baseUrl}}"], "path": ["api", "categories"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Networking\",\n  \"description\": \"Network connectivity issues\",\n  \"sla\": { \"id\": 1 }\n}" }
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Иван\",\n  \"lastName\": \"Петров\",\n  \"email\": \"ivan.petrov@example.com\",\n  \"phone\": \"+7-900-111-22-33\",\n  \"dateOfBirth\": \"1985-06-15\",\n  \"address\": \"Москва, ул. Ленина, д. 5\"\n}" }
           }
         },
         {
-          "name": "Обновить категорию",
+          "name": "Создать клиента — второй",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Мария\",\n  \"lastName\": \"Сидорова\",\n  \"email\": \"maria.sidorova@example.com\",\n  \"phone\": \"+7-900-555-66-77\",\n  \"dateOfBirth\": \"1992-03-20\",\n  \"address\": \"Санкт-Петербург, пр. Невский, д. 10\"\n}" }
+          }
+        },
+        {
+          "name": "Обновить клиента",
           "request": {
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/categories/1", "host": ["{{baseUrl}}"], "path": ["api", "categories", "1"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Infrastructure\",\n  \"description\": \"Server, network, and hardware issues — updated\"\n}" }
+            "url": { "raw": "{{baseUrl}}/api/customers/1", "host": ["{{baseUrl}}"], "path": ["api", "customers", "1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Иван\",\n  \"lastName\": \"Петров\",\n  \"email\": \"ivan.petrov@example.com\",\n  \"phone\": \"+7-900-111-22-99\",\n  \"dateOfBirth\": \"1985-06-15\",\n  \"address\": \"Москва, ул. Тверская, д. 12\"\n}" }
           }
         },
         {
-          "name": "Удалить категорию",
+          "name": "Удалить клиента",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/categories/5", "host": ["{{baseUrl}}"], "path": ["api", "categories", "5"] }
+            "url": { "raw": "{{baseUrl}}/api/customers/2", "host": ["{{baseUrl}}"], "path": ["api", "customers", "2"] }
+          }
+        },
+        {
+          "name": "Дублирующий email → 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Дубль\",\n  \"lastName\": \"Дублев\",\n  \"email\": \"ivan.petrov@example.com\",\n  \"phone\": \"+7-999-000-00-00\",\n  \"dateOfBirth\": \"1990-01-01\",\n  \"address\": \"Нигде\"\n}" },
+            "description": "Ожидаем 409 Conflict — клиент с таким email уже существует."
           }
         }
       ]
     },
     {
-      "name": "Users",
-      "description": "GET — AGENT и ADMIN. POST/PUT/DELETE — только ADMIN.",
+      "name": "Policies (Полисы)",
+      "description": "GET/POST/PUT — ADMIN/AGENT. DELETE — только ADMIN.",
       "item": [
         {
-          "name": "Получить всех пользователей",
+          "name": "Получить все полисы",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"] }
+            "url": { "raw": "{{baseUrl}}/api/policies", "host": ["{{baseUrl}}"], "path": ["api", "policies"] }
           }
         },
         {
-          "name": "Получить пользователя по ID",
+          "name": "Получить полис по ID",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/users/1", "host": ["{{baseUrl}}"], "path": ["api", "users", "1"] }
+            "url": { "raw": "{{baseUrl}}/api/policies/1", "host": ["{{baseUrl}}"], "path": ["api", "policies", "1"] }
           }
         },
         {
-          "name": "Создать пользователя",
+          "name": "Получить полисы клиента",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/policies/customer/1",
+              "host": ["{{baseUrl}}"], "path": ["api", "policies", "customer", "1"]
+            }
+          }
+        },
+        {
+          "name": "Создать полис",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"David Brown\",\n  \"email\": \"david.brown@example.com\"\n}" }
+            "url": {
+              "raw": "{{baseUrl}}/api/policies?customerId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "policies"],
+              "query": [{ "key": "customerId", "value": "1" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"policyNumber\": \"POL-2024-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-12-31\"\n}" }
           }
         },
         {
-          "name": "Обновить пользователя",
+          "name": "Обновить даты полиса",
           "request": {
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/users/1", "host": ["{{baseUrl}}"], "path": ["api", "users", "1"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Alice Johnson Updated\",\n  \"email\": \"alice.updated@example.com\"\n}" }
+            "url": { "raw": "{{baseUrl}}/api/policies/1", "host": ["{{baseUrl}}"], "path": ["api", "policies", "1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2025-12-31\"\n}" }
           }
         },
         {
-          "name": "Удалить пользователя",
+          "name": "Изменить статус полиса",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/policies/1/status?status=SUSPENDED",
+              "host": ["{{baseUrl}}"], "path": ["api", "policies", "1", "status"],
+              "query": [{ "key": "status", "value": "SUSPENDED" }]
+            },
+            "description": "Статусы: ACTIVE, SUSPENDED, EXPIRED, CANCELLED"
+          }
+        },
+        {
+          "name": "Добавить покрытие к полису",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/policies/1/coverages/1", "host": ["{{baseUrl}}"], "path": ["api", "policies", "1", "coverages", "1"] },
+            "description": "Привязывает покрытие с ID=1 к полису с ID=1."
+          }
+        },
+        {
+          "name": "Добавить второе покрытие к полису",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/policies/1/coverages/2", "host": ["{{baseUrl}}"], "path": ["api", "policies", "1", "coverages", "2"] }
+          }
+        },
+        {
+          "name": "Удалить покрытие из полиса",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/users/4", "host": ["{{baseUrl}}"], "path": ["api", "users", "4"] }
+            "url": { "raw": "{{baseUrl}}/api/policies/1/coverages/2", "host": ["{{baseUrl}}"], "path": ["api", "policies", "1", "coverages", "2"] }
+          }
+        },
+        {
+          "name": "Удалить полис",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/policies/2", "host": ["{{baseUrl}}"], "path": ["api", "policies", "2"] }
+          }
+        },
+        {
+          "name": "Дублирующий номер полиса → 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/policies?customerId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "policies"],
+              "query": [{ "key": "customerId", "value": "1" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"policyNumber\": \"POL-2024-001\",\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2025-06-01\"\n}" },
+            "description": "Ожидаем 409 Conflict — номер полиса уже занят."
           }
         }
       ]
     },
     {
-      "name": "Agents",
-      "description": "GET — AGENT и ADMIN. POST/PUT/DELETE — только ADMIN.",
+      "name": "Claims (Страховые случаи)",
+      "description": "POST — USER/ADMIN/AGENT. GET/PUT — ADMIN/AGENT. DELETE — только ADMIN.",
       "item": [
         {
-          "name": "Получить всех агентов",
+          "name": "Получить все заявления",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/agents", "host": ["{{baseUrl}}"], "path": ["api", "agents"] }
+            "url": { "raw": "{{baseUrl}}/api/claims", "host": ["{{baseUrl}}"], "path": ["api", "claims"] }
           }
         },
         {
-          "name": "Получить активных агентов",
+          "name": "Получить заявление по ID",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/agents/active", "host": ["{{baseUrl}}"], "path": ["api", "agents", "active"] }
+            "url": { "raw": "{{baseUrl}}/api/claims/1", "host": ["{{baseUrl}}"], "path": ["api", "claims", "1"] }
           }
         },
         {
-          "name": "Получить агента по ID",
+          "name": "Получить заявления по полису",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/agents/1", "host": ["{{baseUrl}}"], "path": ["api", "agents", "1"] }
+            "url": { "raw": "{{baseUrl}}/api/claims/policy/1", "host": ["{{baseUrl}}"], "path": ["api", "claims", "policy", "1"] }
           }
         },
         {
-          "name": "Создать агента",
+          "name": "Получить заявления по статусу",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/claims/status/PENDING",
+              "host": ["{{baseUrl}}"], "path": ["api", "claims", "status", "PENDING"]
+            },
+            "description": "Статусы: PENDING, UNDER_REVIEW, APPROVED, REJECTED, PAID"
+          }
+        },
+        {
+          "name": "Создать заявление",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/agents", "host": ["{{baseUrl}}"], "path": ["api", "agents"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Kate Morozova\",\n  \"email\": \"kate.morozova@support.com\",\n  \"isActive\": true\n}" }
+            "url": {
+              "raw": "{{baseUrl}}/api/claims?policyId=1&coverageId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "claims"],
+              "query": [
+                { "key": "policyId",    "value": "1" },
+                { "key": "coverageId",  "value": "1" }
+              ]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"incidentDate\": \"2024-03-10\",\n  \"description\": \"Столкновение с другим транспортным средством на парковке\",\n  \"requestedAmount\": 85000.00\n}" }
           }
         },
         {
-          "name": "Обновить агента",
+          "name": "Обновить заявление (только PENDING)",
           "request": {
             "method": "PUT",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/agents/1", "host": ["{{baseUrl}}"], "path": ["api", "agents", "1"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Max Ivanov\",\n  \"email\": \"max.ivanov@support.com\",\n  \"isActive\": true\n}" }
+            "url": { "raw": "{{baseUrl}}/api/claims/1", "host": ["{{baseUrl}}"], "path": ["api", "claims", "1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"incidentDate\": \"2024-03-10\",\n  \"description\": \"Столкновение на парковке — уточнено описание\",\n  \"requestedAmount\": 90000.00\n}" }
           }
         },
         {
-          "name": "Удалить агента",
+          "name": "Удалить заявление",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/agents/4", "host": ["{{baseUrl}}"], "path": ["api", "agents", "4"] }
+            "url": { "raw": "{{baseUrl}}/api/claims/5", "host": ["{{baseUrl}}"], "path": ["api", "claims", "5"] }
+          }
+        },
+        {
+          "name": "Заявление по неактивному полису → 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/claims?policyId=3&coverageId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "claims"],
+              "query": [
+                { "key": "policyId",   "value": "3" },
+                { "key": "coverageId", "value": "1" }
+              ]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"incidentDate\": \"2024-03-15\",\n  \"description\": \"Тест на неактивном полисе\",\n  \"requestedAmount\": 10000.00\n}" },
+            "description": "Ожидаем 400 Bad Request — полис не активен."
+          }
+        },
+        {
+          "name": "Покрытие не входит в полис → 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/claims?policyId=1&coverageId=3",
+              "host": ["{{baseUrl}}"], "path": ["api", "claims"],
+              "query": [
+                { "key": "policyId",   "value": "1" },
+                { "key": "coverageId", "value": "3" }
+              ]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"incidentDate\": \"2024-03-15\",\n  \"description\": \"Тест — покрытие не в полисе\",\n  \"requestedAmount\": 10000.00\n}" },
+            "description": "Ожидаем 400 Bad Request — покрытие не входит в данный полис."
           }
         }
       ]
     },
     {
-      "name": "Tickets",
-      "description": "POST — USER/ADMIN. GET — все авторизованные. PUT — AGENT/ADMIN. DELETE — только ADMIN.",
+      "name": "Payments (Взносы)",
+      "description": "GET/POST/PUT — ADMIN/AGENT. DELETE — только ADMIN.",
       "item": [
         {
-          "name": "Получить все тикеты",
+          "name": "Получить все платежи",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] }
+            "url": { "raw": "{{baseUrl}}/api/payments", "host": ["{{baseUrl}}"], "path": ["api", "payments"] }
           }
         },
         {
-          "name": "Получить тикет по ID",
+          "name": "Получить платёж по ID",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets/1", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "1"] }
+            "url": { "raw": "{{baseUrl}}/api/payments/1", "host": ["{{baseUrl}}"], "path": ["api", "payments", "1"] }
           }
         },
         {
-          "name": "Получить тикеты пользователя",
+          "name": "Получить платежи по полису",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets/user/1", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "user", "1"] }
+            "url": { "raw": "{{baseUrl}}/api/payments/policy/1", "host": ["{{baseUrl}}"], "path": ["api", "payments", "policy", "1"] }
           }
         },
         {
-          "name": "Получить тикеты агента",
+          "name": "Получить просроченные платежи",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets/agent/1", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "agent", "1"] }
+            "url": { "raw": "{{baseUrl}}/api/payments/overdue", "host": ["{{baseUrl}}"], "path": ["api", "payments", "overdue"] }
           }
         },
         {
-          "name": "Получить просроченные тикеты",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets/overdue", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "overdue"] }
-          }
-        },
-        {
-          "name": "Создать тикет",
+          "name": "Создать платёж вручную",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] },
-            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Email service is down\",\n  \"description\": \"Corporate email stopped working for all users.\",\n  \"user\": { \"id\": 1 },\n  \"category\": { \"id\": 1 }\n}" }
-          }
-        },
-        {
-          "name": "Обновить тикет",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/tickets/1", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "1"] },
-            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Server is down — URGENT\",\n  \"description\": \"Production server is not responding.\",\n  \"category\": { \"id\": 1 }\n}" }
-          }
-        },
-        {
-          "name": "Назначить агента на тикет",
-          "request": {
-            "method": "PUT",
             "url": {
-              "raw": "{{baseUrl}}/api/tickets/4/assign?agentId=2",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "4", "assign"],
-              "query": [{ "key": "agentId", "value": "2" }]
-            }
+              "raw": "{{baseUrl}}/api/payments?policyId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "payments"],
+              "query": [{ "key": "policyId", "value": "1" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 5700.00,\n  \"dueDate\": \"2024-04-01\"\n}" }
           }
         },
         {
-          "name": "Изменить статус (OPEN → IN_PROGRESS)",
+          "name": "Отметить платёж оплаченным",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tickets/4/status?newStatus=IN_PROGRESS",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "4", "status"],
-              "query": [{ "key": "newStatus", "value": "IN_PROGRESS" }]
-            }
+            "url": { "raw": "{{baseUrl}}/api/payments/1/pay", "host": ["{{baseUrl}}"], "path": ["api", "payments", "1", "pay"] }
           }
         },
         {
-          "name": "Изменить статус (IN_PROGRESS → RESOLVED)",
+          "name": "Отметить платёж отменённым",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tickets/1/status?newStatus=RESOLVED",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "1", "status"],
-              "query": [{ "key": "newStatus", "value": "RESOLVED" }]
-            }
+            "url": { "raw": "{{baseUrl}}/api/payments/2/cancel", "host": ["{{baseUrl}}"], "path": ["api", "payments", "2", "cancel"] }
           }
         },
         {
-          "name": "Закрыть тикет с решением",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tickets/5/close?solution=Certificate renewed. HTTPS restored.",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "5", "close"],
-              "query": [{ "key": "solution", "value": "Certificate renewed. HTTPS restored." }]
-            }
-          }
-        },
-        {
-          "name": "Удалить тикет",
+          "name": "Удалить платёж",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/tickets/9", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "9"] }
+            "url": { "raw": "{{baseUrl}}/api/payments/5", "host": ["{{baseUrl}}"], "path": ["api", "payments", "5"] }
+          }
+        },
+        {
+          "name": "Повторная оплата → 400",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/api/payments/1/pay", "host": ["{{baseUrl}}"], "path": ["api", "payments", "1", "pay"] },
+            "description": "Ожидаем 400 Bad Request — платёж уже оплачен."
           }
         }
       ]
     },
     {
       "name": "Бизнес-операции",
+      "description": "Операции страховой обработки. Роль: ADMIN или AGENT.",
       "item": [
         {
-          "name": "1. Авто-назначение тикета",
+          "name": "1. Подать заявление на рассмотрение (PENDING → UNDER_REVIEW)",
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/tickets/4/auto-assign", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "4", "auto-assign"] },
-            "description": "Роль: AGENT или ADMIN."
+            "url": { "raw": "{{baseUrl}}/api/insurance/claims/1/submit", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "1", "submit"] },
+            "description": "Переводит заявление из PENDING в UNDER_REVIEW. Ожидаем 200."
           }
         },
         {
-          "name": "2. Эскалация тикета",
+          "name": "1b. Подать заявление не в статусе PENDING → 400",
           "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tickets/4/escalate?categoryId=1",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "4", "escalate"],
-              "query": [{ "key": "categoryId", "value": "1" }]
-            },
-            "description": "Роль: AGENT или ADMIN."
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/insurance/claims/1/submit", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "1", "submit"] },
+            "description": "Ожидаем 400 — заявление уже не в статусе PENDING."
           }
         },
         {
-          "name": "3. Деактивация агента с переназначением",
+          "name": "2. Одобрить заявление (UNDER_REVIEW → APPROVED)",
           "request": {
-            "method": "PUT",
+            "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/agents/3/deactivate?reassignToAgentId=2",
-              "host": ["{{baseUrl}}"], "path": ["api", "agents", "3", "deactivate"],
-              "query": [{ "key": "reassignToAgentId", "value": "2" }]
+              "raw": "{{baseUrl}}/api/insurance/claims/1/approve?approvedAmount=75000",
+              "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "1", "approve"],
+              "query": [{ "key": "approvedAmount", "value": "75000" }]
             },
-            "description": "Роль: только ADMIN."
+            "description": "Сумма выплаты не может превышать лимит покрытия."
           }
         },
         {
-          "name": "4. Статистика по категориям",
+          "name": "2b. Одобрить заявление с превышением лимита → 400",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/insurance/claims/2/approve?approvedAmount=9999999",
+              "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "2", "approve"],
+              "query": [{ "key": "approvedAmount", "value": "9999999" }]
+            },
+            "description": "Ожидаем 400 Bad Request — сумма превышает лимит покрытия."
+          }
+        },
+        {
+          "name": "3. Отклонить заявление (UNDER_REVIEW → REJECTED)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/insurance/claims/2/reject?reason=Случай не является страховым по условиям договора",
+              "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "2", "reject"],
+              "query": [{ "key": "reason", "value": "Случай не является страховым по условиям договора" }]
+            }
+          }
+        },
+        {
+          "name": "4. Произвести выплату (APPROVED → PAID)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/insurance/claims/1/pay", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "1", "pay"] }
+          }
+        },
+        {
+          "name": "5. Сгенерировать ежемесячные взносы для полиса",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/insurance/policies/1/generate-payments", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "policies", "1", "generate-payments"] },
+            "description": "Генерирует платёж на каждый месяц срока действия полиса на основе суммарного monthlyPremium покрытий."
+          }
+        },
+        {
+          "name": "6. Пометить просроченные взносы как OVERDUE",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/insurance/payments/mark-overdue", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "payments", "mark-overdue"] },
+            "description": "Обновляет статус всех PENDING-платежей с dueDate < сегодня на OVERDUE. Возвращает количество обновлённых записей."
+          }
+        },
+        {
+          "name": "7. Статистика по полисам",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/reports/categories", "host": ["{{baseUrl}}"], "path": ["api", "reports", "categories"] },
-            "description": "Роль: AGENT или ADMIN."
+            "url": { "raw": "{{baseUrl}}/api/insurance/stats/policies", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "stats", "policies"] },
+            "description": "Количество полисов в каждом статусе (ACTIVE, SUSPENDED, EXPIRED, CANCELLED)."
           }
         },
         {
-          "name": "4b. Нагрузка на агентов",
+          "name": "8. Статистика по заявлениям",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/reports/agents", "host": ["{{baseUrl}}"], "path": ["api", "reports", "agents"] },
-            "description": "Роль: AGENT или ADMIN."
-          }
-        },
-        {
-          "name": "5. Повторное открытие тикета",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tickets/8/reopen?assignToAgentId=1",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "8", "reopen"],
-              "query": [{ "key": "assignToAgentId", "value": "1" }]
-            },
-            "description": "Роль: AGENT или ADMIN."
+            "url": { "raw": "{{baseUrl}}/api/insurance/stats/claims", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "stats", "claims"] },
+            "description": "Количество заявлений в каждом статусе + суммарные одобренные выплаты."
           }
         }
       ]
@@ -546,7 +704,7 @@
           ],
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] },
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
             "description": "Использует Bearer {{accessToken}} из переменных коллекции."
           }
         },
@@ -612,7 +770,7 @@
           "name": "Шаг 5 — Проверить сессии в БД (SQL)",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] },
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
             "description": "Этот шаг выполняется в БД напрямую, не через API.\n\nSQL для проверки:\n\nSELECT jti, status, created_at, expires_at, last_used_at\nFROM user_sessions\nORDER BY created_at DESC;\n\nОжидаемый результат:\n- 1 запись REVOKED (использованная сессия из шага 3)\n- 1 запись ACTIVE (новая сессия из шага 3)\n\nЗдесь же подтверждаем что новый access-токен всё ещё работает."
           }
         }
@@ -673,60 +831,76 @@
           }
         },
         {
-          "name": "[USER] Создать тикет → 200",
+          "name": "[USER] Создать заявление → 201",
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{userAccessToken}}", "type": "string" }] },
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] },
-            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Test from user1\",\n  \"description\": \"Testing USER role.\",\n  \"user\": { \"id\": 1 },\n  \"category\": { \"id\": 1 }\n}" },
-            "description": "Ожидаем 200 — USER может создавать тикеты."
+            "url": {
+              "raw": "{{baseUrl}}/api/claims?policyId=1&coverageId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "claims"],
+              "query": [
+                { "key": "policyId",   "value": "1" },
+                { "key": "coverageId", "value": "1" }
+              ]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"incidentDate\": \"2024-03-20\",\n  \"description\": \"Тест от USER\",\n  \"requestedAmount\": 5000.00\n}" },
+            "description": "Ожидаем 201 — USER может создавать заявления."
           }
         },
         {
-          "name": "[USER] Удалить тикет → 403",
+          "name": "[USER] Просмотреть клиентов → 403",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{userAccessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
+            "description": "Ожидаем 403 Forbidden — USER не видит клиентов."
+          }
+        },
+        {
+          "name": "[USER] Удалить заявление → 403",
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{userAccessToken}}", "type": "string" }] },
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/tickets/1", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "1"] },
-            "description": "Ожидаем 403 Forbidden — USER не может удалять тикеты."
+            "url": { "raw": "{{baseUrl}}/api/claims/1", "host": ["{{baseUrl}}"], "path": ["api", "claims", "1"] },
+            "description": "Ожидаем 403 Forbidden — USER не может удалять заявления."
           }
         },
         {
-          "name": "[USER] Получить агентов → 403",
-          "request": {
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{userAccessToken}}", "type": "string" }] },
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/agents", "host": ["{{baseUrl}}"], "path": ["api", "agents"] },
-            "description": "Ожидаем 403 Forbidden — USER не видит агентов."
-          }
-        },
-        {
-          "name": "[AGENT] Получить агентов → 200",
+          "name": "[AGENT] Просмотреть клиентов → 200",
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{agentAccessToken}}", "type": "string" }] },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/agents", "host": ["{{baseUrl}}"], "path": ["api", "agents"] },
-            "description": "Ожидаем 200 — AGENT видит агентов."
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
+            "description": "Ожидаем 200 — AGENT видит клиентов."
           }
         },
         {
-          "name": "[AGENT] Создать агента → 403",
+          "name": "[AGENT] Создать покрытие → 403",
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{agentAccessToken}}", "type": "string" }] },
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/agents", "host": ["{{baseUrl}}"], "path": ["api", "agents"] },
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Hacker Agent\",\n  \"email\": \"hacker@support.com\"\n}" },
-            "description": "Ожидаем 403 — только ADMIN может создавать агентов."
+            "url": { "raw": "{{baseUrl}}/api/coverages", "host": ["{{baseUrl}}"], "path": ["api", "coverages"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Тест агента\",\n  \"coverageLimit\": 100000.00,\n  \"monthlyPremium\": 500.00\n}" },
+            "description": "Ожидаем 403 — только ADMIN может создавать покрытия."
           }
         },
         {
-          "name": "[Без токена] Получить тикеты → 401",
+          "name": "[AGENT] Удалить покрытие → 403",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{agentAccessToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/coverages/1", "host": ["{{baseUrl}}"], "path": ["api", "coverages", "1"] },
+            "description": "Ожидаем 403 — только ADMIN может удалять покрытия."
+          }
+        },
+        {
+          "name": "[Без токена] Получить полисы → 401",
           "request": {
             "auth": { "type": "noauth" },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] },
+            "url": { "raw": "{{baseUrl}}/api/policies", "host": ["{{baseUrl}}"], "path": ["api", "policies"] },
             "description": "Ожидаем 401 Unauthorized — без токена доступа нет."
           }
         },
@@ -735,15 +909,15 @@
           "request": {
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYWtlIn0.invalid", "type": "string" }] },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] },
+            "url": { "raw": "{{baseUrl}}/api/policies", "host": ["{{baseUrl}}"], "path": ["api", "policies"] },
             "description": "Ожидаем 401 — невалидный токен."
           }
         }
       ]
     },
     {
-      "name": "Полный сценарий (от регистрации до закрытия)",
-      "description": "Выполняйте шаги по порядку. Токены сохраняются автоматически.",
+      "name": "Полный сценарий (от регистрации до выплаты)",
+      "description": "Полный страховой цикл: создание покрытия → клиент → полис → взносы → страховой случай → выплата. Выполняйте шаги по порядку.",
       "item": [
         {
           "name": "0. Зарегистрировать admin (если нет)",
@@ -781,68 +955,115 @@
           }
         },
         {
-          "name": "2. Создать тикет",
+          "name": "2. Создать покрытие ОСАГО",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/tickets", "host": ["{{baseUrl}}"], "path": ["api", "tickets"] },
-            "body": { "mode": "raw", "raw": "{\n  \"title\": \"VPN не подключается\",\n  \"description\": \"Сотрудники не могут подключиться к корпоративному VPN.\",\n  \"user\": { \"id\": 2 },\n  \"category\": { \"id\": 3 }\n}" },
-            "description": "Запомните id из ответа и замените в шагах 3–7."
+            "url": { "raw": "{{baseUrl}}/api/coverages", "host": ["{{baseUrl}}"], "path": ["api", "coverages"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ОСАГО\",\n  \"description\": \"Обязательное страхование гражданской ответственности\",\n  \"coverageLimit\": 400000.00,\n  \"monthlyPremium\": 1200.00\n}" },
+            "description": "Запомните id покрытия из ответа."
           }
         },
         {
-          "name": "3. Авто-назначить агента",
+          "name": "3. Создать клиента",
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/tickets/9/auto-assign", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "9", "auto-assign"] },
-            "description": "Замените 9 на id из шага 2."
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] },
+            "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"Алексей\",\n  \"lastName\": \"Новиков\",\n  \"email\": \"alexey.novikov@mail.ru\",\n  \"phone\": \"+7-916-000-11-22\",\n  \"dateOfBirth\": \"1980-08-25\",\n  \"address\": \"Казань, ул. Баумана, д. 3\"\n}" },
+            "description": "Запомните id клиента из ответа."
           }
         },
         {
-          "name": "4. Эскалировать в Infrastructure",
+          "name": "4. Создать полис для клиента",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/policies?customerId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "policies"],
+              "query": [{ "key": "customerId", "value": "1" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"policyNumber\": \"POL-2024-FULL-001\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-03-31\"\n}" },
+            "description": "Запомните id полиса из ответа."
+          }
+        },
+        {
+          "name": "5. Добавить покрытие ОСАГО к полису",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/policies/1/coverages/1", "host": ["{{baseUrl}}"], "path": ["api", "policies", "1", "coverages", "1"] }
+          }
+        },
+        {
+          "name": "6. Сгенерировать ежемесячные взносы",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/insurance/policies/1/generate-payments", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "policies", "1", "generate-payments"] },
+            "description": "Должны создаться 3 платежа (январь, февраль, март) по 1200 руб."
+          }
+        },
+        {
+          "name": "7. Оплатить первый взнос",
           "request": {
             "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/api/payments/1/pay", "host": ["{{baseUrl}}"], "path": ["api", "payments", "1", "pay"] }
+          }
+        },
+        {
+          "name": "8. Создать страховой случай",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": {
-              "raw": "{{baseUrl}}/api/tickets/9/escalate?categoryId=1",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "9", "escalate"],
-              "query": [{ "key": "categoryId", "value": "1" }]
+              "raw": "{{baseUrl}}/api/claims?policyId=1&coverageId=1",
+              "host": ["{{baseUrl}}"], "path": ["api", "claims"],
+              "query": [
+                { "key": "policyId",   "value": "1" },
+                { "key": "coverageId", "value": "1" }
+              ]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"incidentDate\": \"2024-02-14\",\n  \"description\": \"ДТП: столкновение на перекрёстке, повреждён бампер и фара\",\n  \"requestedAmount\": 45000.00\n}" },
+            "description": "Запомните id заявления из ответа."
+          }
+        },
+        {
+          "name": "9. Подать заявление на рассмотрение",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/insurance/claims/1/submit", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "1", "submit"] }
+          }
+        },
+        {
+          "name": "10. Одобрить заявление",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/insurance/claims/1/approve?approvedAmount=40000",
+              "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "1", "approve"],
+              "query": [{ "key": "approvedAmount", "value": "40000" }]
             }
           }
         },
         {
-          "name": "5. Перевести в RESOLVED",
+          "name": "11. Произвести выплату",
           "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tickets/9/status?newStatus=RESOLVED",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "9", "status"],
-              "query": [{ "key": "newStatus", "value": "RESOLVED" }]
-            }
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/insurance/claims/1/pay", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "claims", "1", "pay"] }
           }
         },
         {
-          "name": "6. Закрыть с решением",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/tickets/9/close?solution=VPN-клиент обновлён до версии 5.2.",
-              "host": ["{{baseUrl}}"], "path": ["api", "tickets", "9", "close"],
-              "query": [{ "key": "solution", "value": "VPN-клиент обновлён до версии 5.2." }]
-            }
-          }
-        },
-        {
-          "name": "7. Повторно открыть тикет",
-          "request": {
-            "method": "PUT",
-            "url": { "raw": "{{baseUrl}}/api/tickets/9/reopen", "host": ["{{baseUrl}}"], "path": ["api", "tickets", "9", "reopen"] }
-          }
-        },
-        {
-          "name": "8. Статистика по категориям",
+          "name": "12. Статистика по заявлениям",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/reports/categories", "host": ["{{baseUrl}}"], "path": ["api", "reports", "categories"] }
+            "url": { "raw": "{{baseUrl}}/api/insurance/stats/claims", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "stats", "claims"] }
+          }
+        },
+        {
+          "name": "13. Статистика по полисам",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/insurance/stats/policies", "host": ["{{baseUrl}}"], "path": ["api", "insurance", "stats", "policies"] }
           }
         }
       ]

@@ -43,32 +43,36 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
 
-                // --- SLA: просмотр — любой авторизованный, управление — только ADMIN ---
-                .requestMatchers(HttpMethod.GET, "/api/slas/**").authenticated()
-                .requestMatchers("/api/slas/**").hasRole("ADMIN")
+                // --- Покрытия: просмотр — любой авторизованный, управление — ADMIN ---
+                .requestMatchers(HttpMethod.GET, "/api/coverages/**").authenticated()
+                .requestMatchers("/api/coverages/**").hasRole("ADMIN")
 
-                // --- Категории: просмотр — любой авторизованный, управление — только ADMIN ---
-                .requestMatchers(HttpMethod.GET, "/api/categories/**").authenticated()
-                .requestMatchers("/api/categories/**").hasRole("ADMIN")
+                // --- Клиенты: просмотр — ADMIN/AGENT, управление — ADMIN ---
+                .requestMatchers(HttpMethod.GET, "/api/customers/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.POST, "/api/customers").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/customers/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/customers/**").hasRole("ADMIN")
 
-                // --- Пользователи: просмотр — ADMIN/AGENT, управление — ADMIN ---
-                .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("ADMIN", "AGENT")
-                .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+                // --- Полисы: создание и просмотр — ADMIN/AGENT, удаление — ADMIN ---
+                .requestMatchers(HttpMethod.GET, "/api/policies/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.POST, "/api/policies/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.PUT, "/api/policies/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.DELETE, "/api/policies/**").hasRole("ADMIN")
 
-                // --- Агенты: просмотр — ADMIN/AGENT, управление — ADMIN ---
-                .requestMatchers(HttpMethod.GET, "/api/agents/**").hasAnyRole("ADMIN", "AGENT")
-                .requestMatchers("/api/agents/**").hasRole("ADMIN")
+                // --- Платежи: просмотр и управление — ADMIN/AGENT ---
+                .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.POST, "/api/payments/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.PUT, "/api/payments/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.DELETE, "/api/payments/**").hasRole("ADMIN")
 
-                // --- Тикеты ---
-                .requestMatchers(HttpMethod.POST, "/api/tickets").hasAnyRole("ADMIN", "USER")
-                .requestMatchers(HttpMethod.GET, "/api/tickets/**").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/tickets/**").hasAnyRole("ADMIN", "AGENT")
-                .requestMatchers(HttpMethod.DELETE, "/api/tickets/**").hasRole("ADMIN")
+                // --- Страховые случаи: подача — USER/ADMIN/AGENT, обработка — ADMIN/AGENT ---
+                .requestMatchers(HttpMethod.POST, "/api/claims").hasAnyRole("ADMIN", "AGENT", "USER")
+                .requestMatchers(HttpMethod.GET, "/api/claims/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.PUT, "/api/claims/**").hasAnyRole("ADMIN", "AGENT")
+                .requestMatchers(HttpMethod.DELETE, "/api/claims/**").hasRole("ADMIN")
 
-                // --- Отчёты и бизнес-операции ---
-                .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "AGENT")
+                // --- Бизнес-операции и статистика — ADMIN/AGENT ---
+                .requestMatchers("/api/insurance/**").hasAnyRole("ADMIN", "AGENT")
 
                 .anyRequest().authenticated()
             )
