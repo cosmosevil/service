@@ -1,28 +1,29 @@
-# Support Ticket System
+# Insurance System
 
-REST API сервис для управления тикетами технической поддержки.
+REST API сервис для управления страховыми полисами и заявлениями на выплату.
 
 ## Тема
 
-Система обработки заявок (тикетов) в службе поддержки. Пользователи создают тикеты с описанием проблемы, агенты принимают и решают их. Каждая категория тикетов имеет привязанное SLA (соглашение об уровне обслуживания), которое определяет дедлайны ответа и решения.
+Система автоматизации страховой деятельности. Полис оформляется для покупателя и содержит набор покрытий; взносы учитываются в Payment. При наступлении страхового случая создаётся заявление (Claim), которое проходит проверку и расчёт выплаты. Сумма выплаты не может превышать лимит по соответствующему покрытию полиса.
 
 ## Основные сущности
 
 | Сущность   | Таблица      | Описание |
 |------------|-------------|----------|
-| `User`     | `users`     | Пользователи, создающие тикеты. Email уникален. |
-| `Agent`    | `agents`    | Агенты поддержки, обрабатывающие тикеты. Email уникален. Может быть активен/неактивен. |
-| `SLA`      | `slas`      | Соглашение об уровне обслуживания: время первого ответа и время решения в часах. Название уникально. |
-| `Category` | `categories`| Категория тикета (например, Infrastructure, Security). Привязана к одному SLA. Название уникально. |
-| `Ticket`   | `tickets`   | Заявка пользователя. Связана с User, Agent, Category. Имеет статус, дедлайны и историю решения. |
+| `Customer` | `customers` | Страхователь (физическое лицо). Email уникален. Содержит персональные данные: ФИО, дата рождения, адрес, телефон. |
+| `Coverage` | `coverages` | Вид страхового покрытия (например, ОСАГО, КАСКО, ДМС). Определяет лимит выплаты и ежемесячный взнос. Название уникально. |
+| `Policy`   | `policies`  | Страховой полис. Оформляется на клиента, содержит набор покрытий. Имеет срок действия и статус. Номер полиса уникален. |
+| `Payment`  | `payments`  | Ежемесячный страховой взнос по полису. Фиксирует сумму, срок оплаты и статус (PENDING/PAID/OVERDUE/CANCELLED). |
+| `Claim`    | `claims`    | Заявление на страховую выплату. Привязано к полису и конкретному покрытию. Проходит цикл проверки: PENDING → UNDER_REVIEW → APPROVED/REJECTED → PAID. |
 
 ### Связи между таблицами
 
 ```
-SLA         ──1:1──  Category
-Category    ──1:N──  Ticket
-User        ──1:N──  Ticket
-Agent       ──1:N──  Ticket
+Customer    ──1:N──  Policy
+Policy      ──M:N──  Coverage      (таблица policy_coverages)
+Policy      ──1:N──  Payment
+Policy      ──1:N──  Claim
+Coverage    ──1:N──  Claim
 ```
 
 ## Настройка и запуск
@@ -32,99 +33,115 @@ Agent       ──1:N──  Ticket
 - Maven 3.8+
 - PostgreSQL 14+
 
-### Переменные окружения
-
-Скопируйте `.env.example` в `.env` и заполните значения:
-
-```bash
-DB_URL=jdbc:postgresql://localhost:5432/supportdb
-DB_USERNAME=postgres
-DB_PASSWORD=your_password
-SERVER_PORT=8080
-```
+### База данных
 
 Создайте базу данных PostgreSQL:
 ```sql
 CREATE DATABASE supportdb;
 ```
 
+### Переменные окружения
+
+Настройте `src/main/resources/application.properties` или задайте переменные окружения:
+
+```bash
+SERVER_PORT=8443
+SSL_ENABLED=true
+SSL_KEY_STORE_PASSWORD=yourPassword
+```
+
 ### Запуск
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
-
-При первом запуске база данных автоматически заполняется тестовыми данными:
-- 4 SLA (Critical, High, Medium, Low)
-- 4 Category (Infrastructure, Security, Software, General Support)
-- 3 User (Alice, Bob, Carol)
-- 3 Agent (Max, Anna, Pete)
-- 8 Ticket в различных статусах
 
 ## Операции сервиса
 
 ### CRUD по каждой сущности
 
-| Метод  | Путь                        | Описание |
-|--------|-----------------------------|----------|
-| POST   | `/api/users`                | Создать пользователя |
-| GET    | `/api/users`                | Все пользователи |
-| GET    | `/api/users/{id}`           | Пользователь по ID |
-| PUT    | `/api/users/{id}`           | Обновить пользователя |
-| DELETE | `/api/users/{id}`           | Удалить пользователя |
-| POST   | `/api/agents`               | Создать агента |
-| GET    | `/api/agents`               | Все агенты |
-| GET    | `/api/agents/active`        | Только активные агенты |
-| GET    | `/api/agents/{id}`          | Агент по ID |
-| PUT    | `/api/agents/{id}`          | Обновить агента |
-| DELETE | `/api/agents/{id}`          | Удалить агента |
-| POST   | `/api/slas`                 | Создать SLA |
-| GET    | `/api/slas`                 | Все SLA |
-| GET    | `/api/slas/{id}`            | SLA по ID |
-| PUT    | `/api/slas/{id}`            | Обновить SLA |
-| DELETE | `/api/slas/{id}`            | Удалить SLA |
-| POST   | `/api/categories`           | Создать категорию |
-| GET    | `/api/categories`           | Все категории |
-| GET    | `/api/categories/{id}`      | Категория по ID |
-| PUT    | `/api/categories/{id}`      | Обновить категорию |
-| DELETE | `/api/categories/{id}`      | Удалить категорию |
-| POST   | `/api/tickets`              | Создать тикет |
-| GET    | `/api/tickets`              | Все тикеты |
-| GET    | `/api/tickets/{id}`         | Тикет по ID |
-| GET    | `/api/tickets/user/{userId}`| Тикеты пользователя |
-| GET    | `/api/tickets/agent/{agentId}` | Тикеты агента |
-| GET    | `/api/tickets/overdue`      | Просроченные тикеты |
-| PUT    | `/api/tickets/{id}`         | Обновить тикет |
-| PUT    | `/api/tickets/{id}/assign`  | Назначить агента |
-| PUT    | `/api/tickets/{id}/status`  | Изменить статус |
-| PUT    | `/api/tickets/{id}/close`   | Закрыть тикет с решением |
-| DELETE | `/api/tickets/{id}`         | Удалить тикет |
+| Метод  | Путь                                        | Описание |
+|--------|---------------------------------------------|----------|
+| POST   | `/api/coverages`                            | Создать покрытие |
+| GET    | `/api/coverages`                            | Все покрытия |
+| GET    | `/api/coverages/{id}`                       | Покрытие по ID |
+| PUT    | `/api/coverages/{id}`                       | Обновить покрытие |
+| DELETE | `/api/coverages/{id}`                       | Удалить покрытие |
+| POST   | `/api/customers`                            | Создать клиента |
+| GET    | `/api/customers`                            | Все клиенты |
+| GET    | `/api/customers/{id}`                       | Клиент по ID |
+| PUT    | `/api/customers/{id}`                       | Обновить клиента |
+| DELETE | `/api/customers/{id}`                       | Удалить клиента |
+| POST   | `/api/policies?customerId={id}`             | Создать полис для клиента |
+| GET    | `/api/policies`                             | Все полисы |
+| GET    | `/api/policies/{id}`                        | Полис по ID |
+| GET    | `/api/policies/customer/{customerId}`       | Полисы клиента |
+| PUT    | `/api/policies/{id}`                        | Обновить даты полиса |
+| PUT    | `/api/policies/{id}/status?status={status}` | Изменить статус полиса |
+| POST   | `/api/policies/{id}/coverages/{covId}`      | Добавить покрытие к полису |
+| DELETE | `/api/policies/{id}/coverages/{covId}`      | Удалить покрытие из полиса |
+| DELETE | `/api/policies/{id}`                        | Удалить полис |
+| POST   | `/api/claims?policyId={id}&coverageId={id}` | Создать заявление |
+| GET    | `/api/claims`                               | Все заявления |
+| GET    | `/api/claims/{id}`                          | Заявление по ID |
+| GET    | `/api/claims/policy/{policyId}`             | Заявления по полису |
+| GET    | `/api/claims/status/{status}`               | Заявления по статусу |
+| PUT    | `/api/claims/{id}`                          | Обновить заявление (только PENDING) |
+| DELETE | `/api/claims/{id}`                          | Удалить заявление |
+| POST   | `/api/payments?policyId={id}`               | Создать платёж вручную |
+| GET    | `/api/payments`                             | Все платежи |
+| GET    | `/api/payments/{id}`                        | Платёж по ID |
+| GET    | `/api/payments/policy/{policyId}`           | Платежи по полису |
+| GET    | `/api/payments/overdue`                     | Просроченные платежи |
+| PUT    | `/api/payments/{id}/pay`                    | Отметить платёж оплаченным |
+| PUT    | `/api/payments/{id}/cancel`                 | Отменить платёж |
+| DELETE | `/api/payments/{id}`                        | Удалить платёж |
 
 ### Бизнес-операции
 
 | №  | Метод | Путь | Затронутые сущности | Описание |
 |----|-------|------|---------------------|----------|
-| 1  | POST  | `/api/tickets/{id}/auto-assign`              | Ticket + Agent            | Автоматически назначает тикет на активного агента с наименьшей текущей нагрузкой |
-| 2  | PUT   | `/api/tickets/{id}/escalate?categoryId={id}` | Ticket + Category + SLA   | Эскалирует тикет: меняет категорию и пересчитывает дедлайны SLA |
-| 3  | PUT   | `/api/agents/{id}/deactivate?reassignToAgentId={id}` | Agent + Ticket  | Деактивирует агента и переназначает все его активные тикеты на другого агента |
-| 4  | GET   | `/api/reports/categories`                    | Category + Ticket + SLA   | Статистика по категориям: количество тикетов в каждом статусе + параметры SLA |
-| 5  | PUT   | `/api/tickets/{id}/reopen?assignToAgentId={id}` | Ticket + Category + SLA + Agent | Повторно открывает закрытый/отменённый тикет и пересчитывает SLA-дедлайны от текущего времени |
+| 1  | POST  | `/api/insurance/claims/{id}/submit`                        | Claim                    | Подаёт заявление на рассмотрение: PENDING → UNDER_REVIEW |
+| 2  | POST  | `/api/insurance/claims/{id}/approve?approvedAmount={сумма}` | Claim + Coverage         | Одобряет заявление и фиксирует сумму выплаты. Сумма не может превышать лимит покрытия. UNDER_REVIEW → APPROVED |
+| 3  | POST  | `/api/insurance/claims/{id}/reject?reason={причина}`       | Claim                    | Отклоняет заявление с указанием причины. UNDER_REVIEW → REJECTED |
+| 4  | POST  | `/api/insurance/claims/{id}/pay`                           | Claim                    | Производит выплату по одобренному заявлению. APPROVED → PAID |
+| 5  | POST  | `/api/insurance/policies/{id}/generate-payments`           | Policy + Coverage + Payment | Генерирует ежемесячные взносы на весь срок полиса. Сумма = суммарный monthlyPremium всех покрытий |
+| 6  | POST  | `/api/insurance/payments/mark-overdue`                     | Payment                  | Обновляет статус просроченных PENDING-платежей (dueDate < сегодня) на OVERDUE |
+| 7  | GET   | `/api/insurance/stats/policies`                            | Policy                   | Сводная статистика: количество полисов в каждом статусе |
+| 8  | GET   | `/api/insurance/stats/claims`                              | Claim                    | Сводная статистика: количество заявлений в каждом статусе + суммарные выплаты |
 
-### Дополнительный отчёт
-
-| Метод | Путь                   | Описание |
-|-------|------------------------|----------|
-| GET   | `/api/reports/agents`  | Нагрузка на агентов: кол-во активных/решённых/закрытых тикетов |
-
-## Статусная машина тикетов
+## Статусная машина заявлений (Claim)
 
 ```
-OPEN → IN_PROGRESS → RESOLVED → CLOSED
-  ↓         ↓              ↓
-CANCELLED  ON_HOLD      REOPENED
-  ↓         ↓              ↓
-REOPENED  IN_PROGRESS  IN_PROGRESS
+PENDING → UNDER_REVIEW → APPROVED → PAID
+                    ↓
+                REJECTED
 ```
+
+| Переход | Операция | Условие |
+|---------|----------|---------|
+| PENDING → UNDER_REVIEW | `submit` | — |
+| UNDER_REVIEW → APPROVED | `approve` | approvedAmount ≤ coverageLimit |
+| UNDER_REVIEW → REJECTED | `reject` | — |
+| APPROVED → PAID | `pay` | — |
+
+## Статусы полиса (Policy)
+
+| Статус | Описание |
+|--------|----------|
+| `ACTIVE` | Полис действует, можно подавать заявления |
+| `SUSPENDED` | Полис приостановлен |
+| `EXPIRED` | Срок действия истёк |
+| `CANCELLED` | Полис аннулирован |
+
+## Статусы взноса (Payment)
+
+| Статус | Описание |
+|--------|----------|
+| `PENDING` | Ожидает оплаты |
+| `PAID` | Оплачен |
+| `OVERDUE` | Просрочен |
+| `CANCELLED` | Отменён |
 
 ## Безопасность (Spring Security + JWT)
 
@@ -139,9 +156,9 @@ REOPENED  IN_PROGRESS  IN_PROGRESS
 
 | Роль         | Описание |
 |--------------|----------|
-| `ROLE_USER`  | Обычный пользователь. Создаёт тикеты, просматривает тикеты/категории/SLA. |
-| `ROLE_AGENT` | Агент поддержки. Управляет тикетами, просматривает пользователей и отчёты. |
-| `ROLE_ADMIN` | Полный доступ ко всем операциям. |
+| `ROLE_USER`  | Страхователь. Может создавать заявления. |
+| `ROLE_AGENT` | Страховой агент. Управляет полисами, клиентами, обрабатывает заявления и взносы. |
+| `ROLE_ADMIN` | Полный доступ ко всем операциям включая управление покрытиями и удаление записей. |
 
 ### Матрица доступа
 
@@ -150,28 +167,18 @@ REOPENED  IN_PROGRESS  IN_PROGRESS
 | `POST /api/auth/register` | ✅ | ✅ | ✅ | ✅ |
 | `POST /api/auth/login`    | ✅ | ✅ | ✅ | ✅ |
 | `POST /api/auth/refresh`  | ✅ | ✅ | ✅ | ✅ |
-| `GET /api/slas/**` | ❌ | ❌ | ✅ | ✅ |
-| `POST/PUT/DELETE /api/slas/**` | ❌ | ❌ | ❌ | ✅ |
-| `GET /api/categories/**` | ❌ | ❌ | ✅ | ✅ |
-| `POST/PUT/DELETE /api/categories/**` | ❌ | ❌ | ❌ | ✅ |
-| `GET /api/users/**` | ❌ | ❌ | ✅ | ✅ |
-| `POST/PUT/DELETE /api/users/**` | ❌ | ❌ | ❌ | ✅ |
-| `GET /api/agents/**` | ❌ | ❌ | ✅ | ✅ |
-| `POST/PUT/DELETE /api/agents/**` | ❌ | ❌ | ❌ | ✅ |
-| `POST /api/tickets` | ❌ | ✅ | ❌ | ✅ |
-| `GET /api/tickets/**` | ❌ | ✅ | ✅ | ✅ |
-| `PUT /api/tickets/**` | ❌ | ❌ | ✅ | ✅ |
-| `DELETE /api/tickets/**` | ❌ | ❌ | ❌ | ✅ |
-| `GET /api/reports/**` | ❌ | ❌ | ✅ | ✅ |
-
-### Аутентификация — Basic Auth
-
-Поддерживается для обратной совместимости. Все защищённые запросы могут использовать заголовок:
-```
-Authorization: Basic <base64(username:password)>
-```
-
-В Postman: вкладка **Authorization → Basic Auth** → введите username и password.
+| `GET /api/coverages/**` | ❌ | ✅ | ✅ | ✅ |
+| `POST/PUT/DELETE /api/coverages/**` | ❌ | ❌ | ❌ | ✅ |
+| `GET /api/customers/**` | ❌ | ❌ | ✅ | ✅ |
+| `POST/PUT/DELETE /api/customers/**` | ❌ | ❌ | ❌ | ✅ |
+| `GET/POST/PUT /api/policies/**` | ❌ | ❌ | ✅ | ✅ |
+| `DELETE /api/policies/**` | ❌ | ❌ | ❌ | ✅ |
+| `GET/PUT /api/payments/**` | ❌ | ❌ | ✅ | ✅ |
+| `DELETE /api/payments/**` | ❌ | ❌ | ❌ | ✅ |
+| `POST /api/claims` | ❌ | ✅ | ✅ | ✅ |
+| `GET/PUT /api/claims/**` | ❌ | ❌ | ✅ | ✅ |
+| `DELETE /api/claims/**` | ❌ | ❌ | ❌ | ✅ |
+| `GET/POST /api/insurance/**` | ❌ | ❌ | ✅ | ✅ |
 
 ### Аутентификация — JWT Bearer
 
@@ -206,44 +213,7 @@ Content-Type: application/json
 - Хотя бы одна **цифра** (0–9)
 - Хотя бы один **спецсимвол** (`!@#$%^&*` и др.)
 
-Примеры плохих паролей → ответ `400 Bad Request`:
-- `simple` — слишком короткий
-- `password1` — нет заглавной и спецсимвола
-- `Password1` — нет спецсимвола
-
-### CSRF-токены
-
-Spring Security поддерживает CSRF-защиту (актуально при использовании Basic Auth с сессиями).
-
-**Шаг 1.** Сделайте любой GET-запрос с Basic Auth — в ответе придёт cookie `XSRF-TOKEN`.
-
-**Шаг 2.** Для каждого POST/PUT/DELETE добавьте заголовок:
-```
-X-XSRF-TOKEN: <значение из cookie XSRF-TOKEN>
-```
-
-В Postman это можно автоматизировать скриптом в **Tests** вкладке GET-запроса:
-```javascript
-const token = pm.cookies.get('XSRF-TOKEN');
-pm.environment.set('xsrf_token', token);
-```
-Затем в заголовках других запросов: `X-XSRF-TOKEN: {{xsrf_token}}`.
-
-> При использовании JWT Bearer CSRF не требуется — запросы stateless.
-
-### Хранение паролей
-
-Пароли хранятся в таблице `app_users` в виде BCrypt-хэша. В коде и скриптах паролей нет.
-
 ### Эндпоинты аутентификации
-
-#### Регистрация
-```
-POST /api/auth/register
-```
-```json
-{ "username": "admin", "password": "Admin123!", "role": "ROLE_ADMIN" }
-```
 
 #### Вход
 ```
@@ -277,10 +247,6 @@ POST /api/auth/refresh
 | Access token  | 15 минут    | Доступ к API-эндпоинтам |
 | Refresh token | 7 дней      | Получение новой пары токенов |
 
-**Payload access-токена:** `sub` (username), `role`, `type=access`, `iat`, `exp`
-
-**Payload refresh-токена:** `sub` (username), `type=refresh`, `jti` (UUID сессии), `iat`, `exp`
-
 ### Управление сессиями
 
 Каждый refresh-токен привязан к записи в таблице `user_sessions`.
@@ -300,13 +266,6 @@ FROM user_sessions
 ORDER BY created_at DESC;
 ```
 
-### Требования к паролю
-
-- Минимум **8 символов**
-- Хотя бы одна **заглавная буква** (A–Z)
-- Хотя бы одна **цифра** (0–9)
-- Хотя бы один **спецсимвол** (`!@#$%^&*` и др.)
-
 ### Хранение данных
 
 - Пароли — BCrypt-хэш в таблице `app_users`
@@ -325,13 +284,12 @@ Root CA  (STS-RootCA, самоподписанный, 10 лет)
         └── Server cert  (CN=localhost, подписан Intermediate CA, 1 год)
 ```
 
-Все сертификаты содержат `OU=Student-<номер_студенческого_билета>`.
+Все сертификаты содержат `OU=Student-<23120>`.
 
 ### Генерация сертификатов
 
 ```bash
-# Укажите свой номер студенческого билета
-export STUDENT_ID=12345678
+export STUDENT_ID=23120
 export KEYSTORE_PASSWORD=yourStrongPassword
 
 bash generate-certs.sh
@@ -380,10 +338,10 @@ sudo update-ca-certificates
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `SSL_ENABLED` | `false` | Включить HTTPS |
+| `SSL_ENABLED` | `true` | Включить HTTPS |
 | `SSL_KEY_STORE_PATH` | `classpath:keystore.p12` | Путь к keystore |
-| `SSL_KEY_STORE_PASSWORD` | `changeit` | Пароль keystore |
-| `SERVER_PORT` | `8080` | Порт (8443 для HTTPS) |
+| `SSL_KEY_STORE_PASSWORD` | `MyPassword!` | Пароль keystore |
+| `SERVER_PORT` | `8443` | Порт (8443 для HTTPS) |
 
 > Keystore и приватные ключи **никогда** не коммитятся в репозиторий — добавлены в `.gitignore`.
 
@@ -435,8 +393,6 @@ base64 -w 0 src/main/resources/keystore.p12
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("src\main\resources\keystore.p12"))
 ```
 
-Скопируйте вывод и вставьте как значение секрета `KEYSTORE_BASE64`.
-
 > Приватные ключи, keystore и сертификаты **не хранятся в репозитории**. Только в GitHub Secrets.
 
 ---
@@ -448,6 +404,12 @@ base64 -w 0 src/main/resources/keystore.p12
 Импорт в Postman: **File → Import → выбрать `postman_collection.json`**.
 
 **Быстрый старт:**
-1. Выполни `POST /api/auth/register` — создай пользователей
+1. Выполни `POST /api/auth/register` — создай пользователей (ADMIN, AGENT, USER)
 2. Выполни `POST /api/auth/login` — токены сохранятся в переменные коллекции автоматически
 3. Все остальные запросы используют `Bearer {{accessToken}}` из переменных
+
+**Полный страховой цикл** (папка «Полный сценарий»):
+1. Создать покрытие → клиента → полис → добавить покрытие в полис
+2. Сгенерировать ежемесячные взносы → оплатить взнос
+3. Создать заявление → подать → одобрить → выплатить
+4. Посмотреть статистику
