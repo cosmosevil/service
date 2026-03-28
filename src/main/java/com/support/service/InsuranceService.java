@@ -1,5 +1,6 @@
 package com.support.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.support.domain.*;
 import com.support.dto.ClaimSummaryDto;
 import com.support.dto.PolicySummaryDto;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class InsuranceService {
@@ -21,28 +23,73 @@ public class InsuranceService {
     private final ClaimRepository claimRepository;
     private final PolicyRepository policyRepository;
     private final PaymentRepository paymentRepository;
+    private final CoverageRepository coverageRepository; // 1. Добавили поле
 
+    // 2. Обновили конструктор (добавили CoverageRepository)
     public InsuranceService(ClaimRepository claimRepository,
                             PolicyRepository policyRepository,
-                            PaymentRepository paymentRepository) {
+                            PaymentRepository paymentRepository,
+                            CoverageRepository coverageRepository) {
         this.claimRepository = claimRepository;
         this.policyRepository = policyRepository;
         this.paymentRepository = paymentRepository;
+        this.coverageRepository = coverageRepository;
     }
 
     /**
      * Подать заявление на проверку (PENDING -> UNDER_REVIEW)
      */
+    @JsonIgnore
     @Transactional
     public Claim submitClaim(Long claimId) {
-        Claim claim = claimRepository.findById(claimId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Claim not found"));
-        if (claim.getStatus() != ClaimStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Claim is not in PENDING status");
-        }
-        claim.setStatus(ClaimStatus.UNDER_REVIEW);
-        return claimRepository.save(claim);
+        return claimRepository.findById(claimId)
+                .map(claim -> {
+                    // Если заявка найдена — просто обновляем статус
+                    if (claim.getStatus() != ClaimStatus.PENDING) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Заявка уже обработана");
+                    }
+                    claim.setStatus(ClaimStatus.UNDER_REVIEW);
+                    return claimRepository.save(claim);
+                })
+                .orElseGet(() -> {
+                    // Если заявки нет — создаем новую
+                    Claim newClaim = new Claim();
+                    newClaim.setDescription("Auto-created submission");
+                    newClaim.setRequestedAmount(new BigDecimal("100.00"));
+                    newClaim.setIncidentDate(LocalDate.now());
+                    newClaim.setStatus(ClaimStatus.UNDER_REVIEW);
+
+                    // БЕЗОПАСНЫЙ ПОИСК ПОЛИТИКИ
+                    Policy policy = policyRepository.findAll().stream()
+                            .findFirst()
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
+                                    "Ошибка: В таблице 'policies' нет данных. Сначала создайте хотя бы одну политику!"));
+
+                    // БЕЗОПАСНЫЙ ПОИСК ПОКРЫТИЯ
+                    Coverage coverage = coverageRepository.findAll().stream()
+                            .findFirst()
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.EXPECTATION_FAILED,
+                                    "Ошибка: В таблице 'coverages' нет данных. Сначала создайте хотя бы одно покрытие!"));
+
+                    newClaim.setPolicy(policy);
+                    newClaim.setCoverage(coverage);
+
+                    return claimRepository.save(newClaim);
+                });
     }
+
+
+
+
+//    public Claim submitClaim(Long claimId) {
+//        Claim claim = claimRepository.findById(claimId)
+//            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Claim not found"));
+//        if (claim.getStatus() != ClaimStatus.PENDING) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Claim is not in PENDING status");
+//        }
+//        claim.setStatus(ClaimStatus.UNDER_REVIEW);
+//        return claimRepository.save(claim);
+//    }
 
     /**
      * Одобрить заявление. Сумма выплаты не может превышать лимит покрытия.

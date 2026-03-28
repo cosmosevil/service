@@ -6,6 +6,7 @@ import com.support.dto.ClaimSummaryDto;
 import com.support.dto.PolicySummaryDto;
 import com.support.service.InsuranceService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/insurance")
+@Validated
 public class InsuranceBusinessController {
 
     private final InsuranceService insuranceService;
