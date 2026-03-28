@@ -1,5 +1,6 @@
 package com.support.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
@@ -35,6 +36,7 @@ public class Coverage {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "coverages")
     private List<Policy> policies = new ArrayList<>();
 

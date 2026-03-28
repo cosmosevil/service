@@ -1,4 +1,4 @@
-#!/bin/bash
+ge#!/bin/bash
 # =============================================================================
 # Генерация цепочки сертификатов для Support Ticket System
 # Цепочка: Root CA → Intermediate CA → Server
@@ -13,7 +13,7 @@ set -e
 # (иначе /C=RU/... превращается в C:/Program Files/Git/C=RU/...)
 export MSYS_NO_PATHCONV=1
 
-STUDENT_ID="${STUDENT_ID:-XXXXXXXX}"   # <-- подставьте свой номер или задайте env: export STUDENT_ID=12345678
+STUDENT_ID="${STUDENT_ID:23120}"   # <-- подставьте свой номер или задайте env: export STUDENT_ID=12345678
 KEYSTORE_PASSWORD="${KEYSTORE_PASSWORD:-changeit}"
 VALIDITY_ROOT=3650        # 10 лет
 VALIDITY_INTERMEDIATE=1825 # 5 лет
