@@ -1,0 +1,78 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+
+stages:
+  - secrets
+  - build
+  - test
+
+gitleaks-scan:
+  stage: secrets
+  image:
+    name: zricethezav/gitleaks
+    entrypoint: [""]
+  tags:
+    - linux
+    - bas2301
+  script:
+    - gitleaks detect --source . -v --redact
+  allow_failure: false
+
+build-job:
+  stage: build
+  needs: ["gitleaks-scan"]
+  image: eclipse-temurin:21-jdk
+  tags:
+    - linux
+    - bas2301
+  script:
+    - chmod +x mvnw
+    - ./mvnw package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 week
+
+sast-semgrep:
+  stage: test
+  image: semgrep/semgrep
+  tags:
+    - linux
+    - bas2301
+  script:
+    - semgrep scan --config auto --sarif --output report.sarif .
+  artifacts:
+    reports:
+      sast: report.sarif
+
+sca-dependency-check:
+  stage: test
+  image: maven:3.9-eclipse-temurin-21
+  tags:
+    - linux
+    - bas2301
+  script:
+    - chmod +x mvnw
+    - ./mvnw dependency-check:check
+  artifacts:
+    paths:
+      - target/dependency-check-report.html
+
+dast-zap:
+  stage: test
+  image:
+    name: zaproxy/zap-stable
+    entrypoint: [""]
+  tags:
+    - linux
+    - bas2302
+  script:
+    - apt-get update && apt-get install -y openjdk-21-jre
+    - java -jar target/*.jar &
+    - sleep 30
+    - zap-baseline.py -t http://localhost:8080 -c zap-rules.tsv -r zap-report.html || true
+  artifacts:
+    paths:
+      - zap-report.html
+    expire_in: 1 week
