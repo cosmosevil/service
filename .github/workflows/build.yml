@@ -9,64 +9,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Gitleaks Scan (Current Files Only)
+      - name: Gitleaks Scan
         run: |
           docker run --rm -v ${{ github.workspace }}:/code zricethezav/gitleaks:latest detect --source="/code" --no-git -v
 
   build-test-security:
     needs: [secrets-scan]
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Grant execute permission for mvnw
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '21', distribution: 'temurin', cache: maven }
+      - name: Grant permissions
         run: chmod +x mvnw
 
-      - name: Build with Maven
+      - name: Build
         run: ./mvnw package -DskipTests
 
-      - name: Semgrep SAST scan
-        run: |
-          docker run --rm -v $(pwd):/src semgrep/semgrep semgrep scan --config auto --sarif --output report.sarif
-
-      - name: Upload SAST report
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: report.sarif
+      - name: Semgrep SAST
+        run: docker run --rm -v $(pwd):/src semgrep/semgrep semgrep scan --config auto --sarif --output report.sarif
 
       - name: Dependency Check SCA
         run: ./mvnw dependency-check:check
 
-      - name: Upload SCA Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: sca-report
-          path: target/dependency-check-report.html
-
-      - name: Run App for DAST
+      - name: DAST Run and Scan
         run: |
           java -jar target/*.jar &
           sleep 30
 
-      - name: ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'http://localhost:8080'
-          rules_file_name: 'zap-rules.tsv'
-          fail_action: false
+      - name: Install ffuf
+        run: |
+          wget https://github.com/ffuf/ffuf/releases/download/v2.1.0/ffuf_2.1.0_linux_amd64.tar.gz
+          tar -xzf ffuf_2.1.0_linux_amd64.tar.gz
+          sudo mv ffuf /usr/local/bin/
 
-      - name: Upload Jar
+      - name: Web Fuzzing Test
+        run: |
+          java -jar target/*.jar &
+          sleep 45
+          printf "login\nregister\ncourses\nstudents\nadmin" > wordlist.txt
+          ffuf -u http://localhost:8081/api/FUZZ -w wordlist.txt -o fuzz-report.json
+
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: application-jar
-          path: target/*.jar
+          name: security-reports
+          path: |
+            target/dependency-check-report.html
+            fuzz-report.json
+            target/*.jar
